@@ -30,6 +30,19 @@ public class Program
                      if (lines[lineRows].Length > lineColumns)
                          lineColumns++;
                      break;
+                 case ConsoleKey.Enter:
+                     lines.Insert(lineRows + 1, "");
+                     lineColumns = 0;
+                     lineRows++;
+                     break;
+                 case ConsoleKey.UpArrow:
+                     if(lineRows > 0)
+                        lineRows--;
+                     break;
+                 case ConsoleKey.DownArrow:
+                     if (lineRows < lines.Count -1)
+                         lineRows++;
+                     break;
                  default:
                      if (key.KeyChar >= ' ' && key.KeyChar <= '~' || char.IsLetterOrDigit(key.KeyChar))
                      {
