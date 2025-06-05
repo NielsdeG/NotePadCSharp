@@ -43,6 +43,18 @@ public class Program
                      if (lineRows < lines.Count -1)
                          lineRows++;
                      break;
+                 case ConsoleKey.Backspace:
+                     if (lineColumns > 0)
+                     {
+                         lines[lineRows] = lines[lineRows].Remove(lineColumns -1, 1);
+                         lineColumns--;
+                     }
+                     break;
+                 case ConsoleKey.Delete:
+                     if (lineColumns > 0 && lineColumns < lines[lineRows].Length)
+                     lines[lineRows] = lines[lineRows].Remove(lineColumns, 1);
+                     break;
+
                  default:
                      if (key.KeyChar >= ' ' && key.KeyChar <= '~' || char.IsLetterOrDigit(key.KeyChar))
                      {
