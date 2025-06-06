@@ -13,11 +13,6 @@ public class Program
     public static void Main(string[] args)
     {
         Console.CursorVisible = true;
-        
-        
-        
-
-        
         while (true) {
             Console.Clear();
             for (int i = 0; i < lines.Count; i++)
@@ -31,14 +26,20 @@ public class Program
 
              if (key.Modifiers == ConsoleModifiers.Control)
              {
-                 if (key.Key == ConsoleKey.Z)
+                 switch (key.Key)
                  {
-                     Undo();
-                 }
-
-                 if (key.Key == ConsoleKey.Y)
-                 {
-                     Redo();
+                     case ConsoleKey.Z:
+                         Undo();
+                         continue;
+                     case ConsoleKey.Y:
+                         Redo();
+                         continue;
+                     case ConsoleKey.Backspace:
+                         HandleCtrlBackspace();
+                         continue;
+                     case ConsoleKey.Delete:
+                         HandleCtrlDelete();
+                         continue;
                  }
              }
              
@@ -155,6 +156,91 @@ public class Program
             lines = new List<string>(redoState.Lines);
             lineRows = redoState.LineRows;
             lineColumns = redoState.LineColumns;
+        }
+    }
+
+    private static void HandleCtrlBackspace()
+    {
+        if (lineColumns == 0 && lineRows == 0)
+        {
+            return;
+        }
+        
+        string currentLine = lines[lineRows];
+
+        if (lineColumns > 0)
+        {
+            int originalCursorPos = lineColumns;
+            int startIndex = lineColumns;
+
+            while (startIndex > 0 && char.IsWhiteSpace(currentLine[startIndex - 1]))
+            {
+                startIndex--;
+            }
+            
+            while (startIndex > 0 && !char.IsWhiteSpace(currentLine[startIndex - 1]))
+            {
+                startIndex--;
+            }
+            
+            int charsToDelete = originalCursorPos - startIndex;
+            if (charsToDelete > 0)
+            {
+                RedoStack.Clear();
+                UndoStack.Push(new Editorstate(lines, lineRows, lineColumns));
+                lines[lineRows] = lines[lineRows].Remove(startIndex, charsToDelete);
+                lineColumns = startIndex;
+
+            }
+        }else if (lineRows > 0)
+        {
+            UndoStack.Push(new Editorstate(lines, lineRows, lineColumns));
+            RedoStack.Clear();
+            String line = lines[lineRows]; 
+            lines.RemoveAt(lineRows);
+            lineRows--;
+            lineColumns = lines[lineRows].Length;
+            lines[lineRows] += line;
+        }
+    }
+    
+    private static void HandleCtrlDelete()
+    {
+        if (lineRows == lines.Count - 1 && lineColumns == lines[lineRows].Length)
+        {
+            return;
+        }
+        
+        string currentLine = lines[lineRows];
+
+        if (lineColumns < currentLine.Length)
+        {
+            int originalCursorPos = lineColumns;
+            int endIndex = lineColumns;
+
+            while (endIndex < currentLine.Length && char.IsWhiteSpace(currentLine[endIndex]))
+            {
+                endIndex++;
+            }
+            
+            while (endIndex < currentLine.Length && !char.IsWhiteSpace(currentLine[endIndex]))
+            {
+                endIndex++;
+            }
+            
+            int charsToDelete = endIndex - originalCursorPos;
+            if (charsToDelete > 0)
+            {
+                RedoStack.Clear();
+                UndoStack.Push(new Editorstate(lines, lineRows, lineColumns));
+                lines[lineRows] = lines[lineRows].Remove(originalCursorPos, charsToDelete);
+            }
+        }else if (lineRows < lines.Count - 1)
+        {
+            UndoStack.Push(new Editorstate(lines, lineRows, lineColumns));
+            RedoStack.Clear();
+            lines[lineRows] += lines[lineRows + 1];
+            lines.RemoveAt(lineRows + 1);
         }
     }
     
